@@ -8,9 +8,12 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
-  String _emailValue;
-  String _passwordValue;
-  bool _acceptTerms = false;
+  final Map<String, dynamic> _formData = {
+    'emailValue': null,
+    'passwordValue': null,
+    'acceptTerms': false
+  };
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   DecorationImage _buildBackgroundImage() {
     return DecorationImage(
@@ -31,6 +34,11 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   void _submitCode() {
+    if (!_formKey.currentState.validate() && _formData['acceptTerms']) {
+      return;
+    }
+    _formKey.currentState.save();
+    print(_formData);
     Navigator.pushReplacementNamed(context, '/products');
   }
 
@@ -52,47 +60,56 @@ class _AuthPageState extends State<AuthPage> {
         padding: EdgeInsets.all(10.0),
         child: Center(
           child: SingleChildScrollView(
-            child: Container(
-              width: deviceWidth,
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    decoration: _buildInputDecoration('E-mail'),
-                    keyboardType: TextInputType.emailAddress,
-                    onChanged: (String value) {
-                      setState(() {
-                        _emailValue = value;
-                      });
-                    },
-                  ),
-                  TextField(
-                    decoration: _buildInputDecoration('Password'),
-                    obscureText: true,
-                    onChanged: (String value) {
-                      setState(() {
-                        _passwordValue = value;
-                      });
-                    },
-                  ),
-                  SwitchListTile(
-                    value: _acceptTerms,
-                    onChanged: (bool value) {
-                      setState(() {
-                        _acceptTerms = value;
-                      });
-                    },
-                    title: Text('Accept Terms'),
-                  ),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  RaisedButton(
-                    color: Theme.of(context).primaryColor,
-                    textColor: Colors.white,
-                    child: Text('LOGIN'),
-                    onPressed: _submitCode,
-                  ),
-                ],
+            child: Form(
+              key: _formKey,
+              child: Container(
+                width: deviceWidth,
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      decoration: _buildInputDecoration('E-mail'),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (String value) {
+                        if (value.isEmpty ||
+                            !RegExp(r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                                .hasMatch(value)) {
+                          return "E-mail is not valid";
+                        }
+                      },
+                      onSaved: (String value) {
+                        _formData['emailValue'] = value;
+                      },
+                    ),
+                    TextFormField(
+                      decoration: _buildInputDecoration('Password'),
+                      obscureText: true,
+                      validator: (String value) {
+                        if (value.isEmpty) {
+                          return "Password should not be empty.";
+                        }
+                      },
+                      onSaved: (String value) {
+                        _formData['passwordValue'] = value;
+                      },
+                    ),
+                    SwitchListTile(
+                      value: _formData['acceptTerms'],
+                      onChanged: (bool value) {
+                        _formData['acceptTerms'] = value;
+                      },
+                      title: Text('Accept Terms'),
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    RaisedButton(
+                      color: Theme.of(context).primaryColor,
+                      textColor: Colors.white,
+                      child: Text('LOGIN'),
+                      onPressed: _submitCode,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

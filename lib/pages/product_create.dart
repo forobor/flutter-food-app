@@ -12,9 +12,22 @@ class ProductCreatePage extends StatefulWidget {
 }
 
 class _ProductCreatePage extends State<ProductCreatePage> {
-  String _title;
-  double _price;
-  String _description;
+  final Map<String, dynamic> _formData = {
+    'title': null,
+    'price': null,
+    'description': null,
+    'imageUrl': 'assets/food.jpg'
+  };
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  void _submitForm() {
+    if (!_formKey.currentState.validate()) {
+      return;
+    }
+    _formKey.currentState.save();
+    widget.addProduct(_formData);
+    Navigator.pushReplacementNamed(context, '/products');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,64 +35,63 @@ class _ProductCreatePage extends State<ProductCreatePage> {
         MediaQuery.of(context).orientation == Orientation.landscape
             ? 60.0
             : 0.0;
-    return Container(
-      padding: EdgeInsets.all(10.0),
-      child: ListView(
-        padding: EdgeInsets.symmetric(horizontal: listPadding),
-        children: <Widget>[
-          TextField(
-            decoration: InputDecoration(labelText: 'Product Title'),
-            onChanged: (String value) {
-              setState(() {
-                _title = value;
-              });
-            },
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
+      },
+      child: Container(
+        padding: EdgeInsets.all(10.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: EdgeInsets.symmetric(horizontal: listPadding),
+            children: <Widget>[
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Product Title'),
+                validator: (String value) {
+                  if (value.isEmpty) {
+                    return 'Title is requiered.';
+                  }
+                },
+                onSaved: (String value) {
+                  _formData['title'] = value;
+                },
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Price'),
+                keyboardType: TextInputType.number,
+                validator: (String value) {
+                  if (value.isEmpty ||
+                      !RegExp(r'^(?:[1-9]\d*|0)?(?:\.\d+)?$').hasMatch(value)) {
+                    return 'Price is requiered and should be a number.';
+                  }
+                },
+                onSaved: (String value) {
+                  _formData['price'] = double.parse(value);
+                },
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Description'),
+                maxLines: 4,
+                onSaved: (String value) {
+                  _formData['description'] = value;
+                },
+              ),
+              SizedBox(
+                height: 15.0,
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: RaisedButton(
+                  child: Text('Save'),
+                  color: Theme.of(context).accentColor,
+                  textColor: Colors.white,
+                  onPressed: _submitForm,
+                ),
+              ),
+            ],
           ),
-          TextField(
-            decoration: InputDecoration(labelText: 'Price'),
-            keyboardType: TextInputType.number,
-            onChanged: (String value) {
-              setState(() {
-                _price = double.parse(value);
-              });
-            },
-          ),
-          TextField(
-            decoration: InputDecoration(labelText: 'Description'),
-            onChanged: (String value) {
-              setState(() {
-                _description = value;
-              });
-            },
-            maxLines: 4,
-          ),
-          SwitchListTile(
-            value: true,
-            onChanged: (bool value) {},
-            title: Text('Accept'),
-          ),
-          SizedBox(
-            height: 15.0,
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: RaisedButton(
-              child: Text('Save'),
-              color: Theme.of(context).accentColor,
-              textColor: Colors.white,
-              onPressed: () {
-                final Map<String, dynamic> product = {
-                  'title': _title,
-                  'price': _price,
-                  'description': _description,
-                  'imageUrl': 'assets/food.jpg'
-                };
-                widget.addProduct(product);
-                Navigator.pushReplacementNamed(context, '/products');
-              },
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
