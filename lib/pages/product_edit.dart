@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/helpers/ensure-visible.dart';
+import '../models/product.dart';
 
 class ProductEditPage extends StatefulWidget {
   final Function addProduct;
   final Function updateProduct;
-  final Map<String, dynamic> product;
+  final Product product;
   final int productIndex;
 
   ProductEditPage(
@@ -22,7 +23,7 @@ class _ProductEditPage extends State<ProductEditPage> {
     'title': null,
     'price': null,
     'description': null,
-    'imageUrl': 'assets/food.jpg'
+    'image': 'assets/food.jpg'
   };
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _titleFocusNode = FocusNode();
@@ -33,12 +34,17 @@ class _ProductEditPage extends State<ProductEditPage> {
     if (!_formKey.currentState.validate()) {
       return;
     }
+    final Product product = Product(
+      title: _formData['title'],
+      price: _formData['price'],
+      description: _formData['description'],
+      image: _formData['image'],
+    );
     if (widget.product == null) {
-      widget.addProduct(_formData);
+      widget.addProduct(product);
     } else {
-      widget.updateProduct(widget.productIndex, _formData);
+      widget.updateProduct(widget.productIndex, product);
     }
-    _formKey.currentState.save();
     Navigator.pushReplacementNamed(context, '/products');
   }
 
@@ -66,7 +72,7 @@ class _ProductEditPage extends State<ProductEditPage> {
                   focusNode: _titleFocusNode,
                   decoration: InputDecoration(labelText: 'Product Title'),
                   initialValue:
-                      widget.product != null ? widget.product['title'] : '',
+                      widget.product != null ? widget.product.title : '',
                   validator: (String value) {
                     if (value.isEmpty) {
                       return 'Title is requiered.';
@@ -84,7 +90,7 @@ class _ProductEditPage extends State<ProductEditPage> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(labelText: 'Price'),
                   initialValue: widget.product != null
-                      ? widget.product['price'].toString()
+                      ? widget.product.price.toString()
                       : '',
                   validator: (String value) {
                     if (value.isEmpty ||
@@ -103,9 +109,8 @@ class _ProductEditPage extends State<ProductEditPage> {
                 child: TextFormField(
                   focusNode: _descriptionFocusNode,
                   decoration: InputDecoration(labelText: 'Description'),
-                  initialValue: widget.product != null
-                      ? widget.product['description']
-                      : '',
+                  initialValue:
+                      widget.product != null ? widget.product.description : '',
                   maxLines: 4,
                   onSaved: (String value) {
                     _formData['description'] = value;

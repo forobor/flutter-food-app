@@ -5,11 +5,11 @@ import '../widgets/ui_elements/title_default.dart';
 
 class ProductPage extends StatelessWidget {
   final String title;
-  final String imageURL;
+  final String image;
   final double price;
   final String description;
 
-  ProductPage(this.title, this.imageURL, this.price, this.description);
+  ProductPage(this.title, this.image, this.price, this.description);
 
   // _showWarningDialog(BuildContext context) {
   //   showDialog(
@@ -38,6 +38,11 @@ class ProductPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextStyle textStyle = TextStyle(
+      fontFamily: 'Oswald',
+      color: Colors.grey,
+    );
+
     return WillPopScope(
       onWillPop: () {
         Navigator.pop(context, false);
@@ -62,10 +67,7 @@ class ProductPage extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     '\$ ${price.toString()}',
-                    style: TextStyle(
-                      fontFamily: 'Oswald',
-                      color: Colors.grey,
-                    ),
+                    style: textStyle,
                   ),
                   Text(
                     ' | ',
@@ -75,10 +77,7 @@ class ProductPage extends StatelessWidget {
                   ),
                   Text(
                     'Tallinn',
-                    style: TextStyle(
-                      fontFamily: 'Oswald',
-                      color: Colors.grey,
-                    ),
+                    style: textStyle,
                   ),
                 ],
               ),

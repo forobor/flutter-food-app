@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 
 import './product_card.dart';
+import '../../models/product.dart';
 
 class Products extends StatelessWidget {
   // final - constant
-  final List<Map<String, dynamic>> products;
+  final List<Product> products;
 
   // constructor. argument is brackets is optional, f.e. [this.products]
   Products(this.products);
 
   Widget _buildProductItem(BuildContext context, int index) {
-     return ProductCard(products[index], index);
+    return ProductCard(products[index], index);
   }
 
   @override

@@ -8,7 +8,7 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
-  final Map<String, dynamic> _formData = {
+  final Map<String,dynamic> _formData = {
     'emailValue': null,
     'passwordValue': null,
     'acceptTerms': false
