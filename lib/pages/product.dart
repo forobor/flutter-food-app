@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:scoped_model/scoped_model.dart';
 
 import '../widgets/ui_elements/title_default.dart';
+import '../scoped-models/products.dart';
+import '../models/product.dart';
 
 class ProductPage extends StatelessWidget {
-  final String title;
-  final String image;
-  final double price;
-  final String description;
+  final int productIndex;
 
-  ProductPage(this.title, this.image, this.price, this.description);
+  ProductPage(this.productIndex);
 
   // _showWarningDialog(BuildContext context) {
   //   showDialog(
@@ -48,50 +48,55 @@ class ProductPage extends StatelessWidget {
         Navigator.pop(context, false);
         return Future.value(false);
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(title),
-        ),
-        body: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Image.asset('assets/food.jpg'),
-              Container(
-                padding: EdgeInsets.all(10.0),
-                child: TitleDefault(title),
-              ),
-              SizedBox(width: 9.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      child: ScopedModelDescendant(
+        builder: (BuildContext context, Widget child, ProductsModel model) {
+          final Product product = model.products[productIndex];
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(product.title),
+            ),
+            body: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Text(
-                    '\$ ${price.toString()}',
-                    style: textStyle,
+                  Image.asset(product.image),
+                  Container(
+                    padding: EdgeInsets.all(10.0),
+                    child: TitleDefault(product.title),
                   ),
-                  Text(
-                    ' | ',
-                    style: TextStyle(
-                      color: Colors.grey,
+                  SizedBox(width: 9.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        '\$ ${product.price.toString()}',
+                        style: textStyle,
+                      ),
+                      Text(
+                        ' | ',
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                      Text(
+                        'Tallinn',
+                        style: textStyle,
+                      ),
+                    ],
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 10.0),
+                    padding: EdgeInsets.all(10.0),
+                    child: Text(
+                      product.description,
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                  Text(
-                    'Tallinn',
-                    style: textStyle,
                   ),
                 ],
               ),
-              Container(
-                margin: EdgeInsets.only(top: 10.0),
-                padding: EdgeInsets.all(10.0),
-                child: Text(
-                  description,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -1,41 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 import './product_edit.dart';
 import '../models/product.dart';
+import '../scoped-models/products.dart';
 
 class ProductListPage extends StatelessWidget {
-  final List<Product> products;
-  final Function updateProduct;
-  final Function deleteProduct;
-
-  ProductListPage(this.products, this.updateProduct, this.deleteProduct);
-
   void _navigateToProductEdit(BuildContext context, int index) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return ProductEditPage(
-            product: products[index],
-            updateProduct: updateProduct,
-            productIndex: index,
-          );
+          return ProductEditPage(index);
         },
       ),
     );
   }
 
-  void _deleteProduct(DismissDirection direction, int index) {
+  void _deleteProduct(
+      DismissDirection direction, int index, Function deleteProduct) {
     if (direction == DismissDirection.endToStart) {
       deleteProduct(index);
     }
   }
 
   Widget _buildListItem(BuildContext context, int index) {
+    ProductsModel productModel =
+        ScopedModel.of<ProductsModel>(context, rebuildOnChange: true);
+    Product product = productModel.products[index];
+    Function deleteProduct = productModel.deleteProduct;
     // swipe out
     return Dismissible(
-      key: Key(products[index].title),
+      key: Key(product.title),
       onDismissed: (DismissDirection direction) {
-        _deleteProduct(direction, index);
+        _deleteProduct(direction, index, deleteProduct);
       },
       background: Container(color: Colors.red),
       child: Column(
@@ -43,11 +40,11 @@ class ProductListPage extends StatelessWidget {
           ListTile(
             leading: CircleAvatar(
               backgroundImage: AssetImage(
-                products[index].image,
+                product.image,
               ),
             ),
-            title: Text(products[index].title),
-            subtitle: Text('\$${products[index].price.toString()}'),
+            title: Text(product.title),
+            subtitle: Text('\$${product.price.toString()}'),
             trailing: IconButton(
               icon: Icon(Icons.edit),
               onPressed: () {
@@ -63,6 +60,8 @@ class ProductListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<Product> products =
+        ScopedModel.of<ProductsModel>(context, rebuildOnChange: true).products;
     return ListView.builder(
       itemBuilder: _buildListItem,
       itemCount: products.length,

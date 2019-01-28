@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 import '../widgets/helpers/ensure-visible.dart';
 import '../models/product.dart';
+import '../scoped-models/products.dart';
 
 class ProductEditPage extends StatefulWidget {
-  final Function addProduct;
-  final Function updateProduct;
-  final Product product;
   final int productIndex;
 
-  ProductEditPage(
-      {this.addProduct, this.updateProduct, this.product, this.productIndex});
+  ProductEditPage([this.productIndex]);
 
   @override
   State<StatefulWidget> createState() {
@@ -19,6 +17,7 @@ class ProductEditPage extends StatefulWidget {
 }
 
 class _ProductEditPage extends State<ProductEditPage> {
+  ProductsModel productModel;
   final Map<String, dynamic> _formData = {
     'title': null,
     'price': null,
@@ -31,31 +30,35 @@ class _ProductEditPage extends State<ProductEditPage> {
   final _descriptionFocusNode = FocusNode();
 
   void _submitForm() {
+    Function addProduct = productModel.addProduct;
+    Function updateProduct = productModel.updateProduct;
+
     if (!_formKey.currentState.validate()) {
       return;
     }
+    _formKey.currentState.save();
     final Product product = Product(
       title: _formData['title'],
       price: _formData['price'],
       description: _formData['description'],
       image: _formData['image'],
     );
-    if (widget.product == null) {
-      widget.addProduct(product);
+    if (widget.productIndex == null) {
+      addProduct(product);
     } else {
-      widget.updateProduct(widget.productIndex, product);
+      updateProduct(product, widget.productIndex);
     }
     Navigator.pushReplacementNamed(context, '/products');
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _mainBuild() {
+    final Product product = productModel.getProduct(widget.productIndex);
     final double listPadding =
         MediaQuery.of(context).orientation == Orientation.landscape
             ? 60.0
             : 0.0;
 
-    final Widget _main = GestureDetector(
+    return GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
       },
@@ -71,8 +74,7 @@ class _ProductEditPage extends State<ProductEditPage> {
                 child: TextFormField(
                   focusNode: _titleFocusNode,
                   decoration: InputDecoration(labelText: 'Product Title'),
-                  initialValue:
-                      widget.product != null ? widget.product.title : '',
+                  initialValue: product != null ? product.title : '',
                   validator: (String value) {
                     if (value.isEmpty) {
                       return 'Title is requiered.';
@@ -89,9 +91,7 @@ class _ProductEditPage extends State<ProductEditPage> {
                   focusNode: _priceFocusNode,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(labelText: 'Price'),
-                  initialValue: widget.product != null
-                      ? widget.product.price.toString()
-                      : '',
+                  initialValue: product != null ? product.price.toString() : '',
                   validator: (String value) {
                     if (value.isEmpty ||
                         !RegExp(r'^(?:[1-9]\d*|0)?(?:\.\d+)?$')
@@ -109,8 +109,7 @@ class _ProductEditPage extends State<ProductEditPage> {
                 child: TextFormField(
                   focusNode: _descriptionFocusNode,
                   decoration: InputDecoration(labelText: 'Description'),
-                  initialValue:
-                      widget.product != null ? widget.product.description : '',
+                  initialValue: product != null ? product.description : '',
                   maxLines: 4,
                   onSaved: (String value) {
                     _formData['description'] = value;
@@ -134,12 +133,18 @@ class _ProductEditPage extends State<ProductEditPage> {
         ),
       ),
     );
-    return widget.product == null
-        ? _main
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    productModel =
+        ScopedModel.of<ProductsModel>(context, rebuildOnChange: true);
+    return widget.productIndex == null
+        ? _mainBuild()
         : Scaffold(
             appBar: AppBar(
               title: Text('Edit Prodcut'),
             ),
-            body: _main);
+            body: _mainBuild());
   }
 }

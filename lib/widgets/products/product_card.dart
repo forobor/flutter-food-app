@@ -5,14 +5,11 @@ import '../ui_elements/title_default.dart';
 import './address_tag.dart';
 import '../../models/product.dart';
 
-
-
 class ProductCard extends StatelessWidget {
   final Product product;
   final int index;
 
   ProductCard(this.product, this.index);
-
   @override
   Widget build(BuildContext context) {
     return Card(
