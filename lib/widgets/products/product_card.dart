@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 import './price_tag.dart';
 import '../ui_elements/title_default.dart';
 import './address_tag.dart';
 import '../../models/product.dart';
+import '../../scoped-models/products.dart';
 
 class ProductCard extends StatelessWidget {
-  final Product product;
   final int index;
 
-  ProductCard(this.product, this.index);
+  ProductCard(this.index);
+
+  Icon _displayFavorite(bool isFavorite) {
+    if (isFavorite) {
+      return Icon(Icons.favorite_border);
+    }
+    return Icon(Icons.favorite);
+  }
+
   @override
   Widget build(BuildContext context) {
+    ProductsModel productModel =
+        ScopedModel.of<ProductsModel>(context, rebuildOnChange: true);
+    final Product product = productModel.getProduct(index);
     return Card(
       child: Column(
         children: <Widget>[
@@ -48,9 +60,11 @@ class ProductCard extends StatelessWidget {
                     }),
               ),
               IconButton(
-                icon: Icon(Icons.favorite_border),
+                icon: Icon(product.isFavorite
+                    ? Icons.favorite
+                    : Icons.favorite_border),
                 color: Colors.red,
-                onPressed: () {},
+                onPressed: () => productModel.toggleProductFavorite(index),
               ),
             ],
           )

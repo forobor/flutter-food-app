@@ -4,24 +4,26 @@ import 'package:scoped_model/scoped_model.dart';
 import './product_card.dart';
 import '../../models/product.dart';
 import '../../scoped-models/products.dart';
+import '../../scoped-models/app_model.dart';
 
 class Products extends StatelessWidget {
-  Widget _buildProductItem(BuildContext context, int index, ProductsModel model) {
-    return ProductCard(model.products[index], index);
+  Widget _buildProductItem(BuildContext context, int index) {
+    return ProductCard(index);
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModelDescendant<ProductsModel>(
-      builder: (BuildContext context, Widget child, ProductsModel model) {
-        return model.products.length > 0
-            ? ListView.builder(
-                itemBuilder: (BuildContext context, int index) =>
-                    _buildProductItem(context, index, model),
-                itemCount: model.products.length,
-              )
-            : Center(child: Text('No products. Add product'));
-      },
-    );
+    bool isShowFavorite =
+        ScopedModel.of<AppModel>(context, rebuildOnChange: true).showFavorite;
+    ProductsModel productModel =
+        ScopedModel.of<ProductsModel>(context, rebuildOnChange: true);
+    List<Product> products =
+        isShowFavorite ? productModel.favoriteProducts : productModel.products;
+    return products.length > 0
+        ? ListView.builder(
+            itemBuilder: _buildProductItem,
+            itemCount: products.length,
+          )
+        : Center(child: Text('No products. Add product'));
   }
 }
